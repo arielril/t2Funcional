@@ -45,13 +45,24 @@ _ |.| [] = []
 s1 |.| s2 = N.nub (map (head s1++) s2 ++ tail s1 |.| s2)
 
 star::[String]->[String]
-star s = s
+star s = s++map (head x++) (tail x) ++ star (tail x)
+    where x = concat (iterate star s)
+      --concat (iterate star s)
 
 char::String->String
 char s = if length s == 1 then s else []
 
+rec::[String]->[String]->Bool
+-- rec <lista de possiveis> <lista dada pelo usuario>
+rec x y = or (rec' x y)
 
-ex01 = (["a"] |+| ["b"]) |.| (["a"] |+| ["b"])
+rec'::[String]->[String]->[Bool]
+rec' x y = map (elem (head x)) [y] ++ rec' (tail x) y
+
+  --((map (elem (head x)) [y]) ++ rec (tail x) y)
+
+
+--ex01 = (["a"] |+| ["b"]) |.| (["a"] |+| ["b"])
 
 {-
 data Regex = Eps | Lit Char | Concat Regex Regex | Union Regex Regex | Star Regex deriving Eq
