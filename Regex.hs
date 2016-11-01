@@ -19,17 +19,6 @@ import qualified Data.List as N (nub)
 -- retorna ["aa","ab","ba"]
 -}
 
-{-
-
-  Criar as funcoes com os operandos requisitados e utilizar como entrada as
-  Strings.
-
-  Iterar recursivamente sobre elas para obter os resultados esperados.
-  Aplicar a isnt acima para cada caracter da String.
-
--}
-
-
 (|+|)::[String] -> [String] -> [String]
 -- Executar a operacao de uniao sobre s1 e s2
 [] |+| _ = []
@@ -44,9 +33,12 @@ s1 |+| s2 = N.nub (s1++s2++((map (head s1++) s2) ++ (tail s1 |+| s2)) ++
 _ |.| [] = []
 s1 |.| s2 = N.nub (map (head s1++) s2 ++ tail s1 |.| s2)
 
-star::[String]->[String]
-star s = s++map (head x++) (tail x) ++ star (tail x)
-    where x = concat (iterate star s)
+star::[String] -> [String]
+star s = take 1000 (star' s)
+
+star'::[String]->[String]
+star' s = s++map (head x++) (tail x) ++ star' (tail x)
+    where x = concat (iterate star' s)
       --concat (iterate star s)
 
 char::String->String
@@ -59,10 +51,14 @@ rec x y = or (rec' x y)
 rec'::[String]->[String]->[Bool]
 rec' x y = map (elem (head x)) [y] ++ rec' (tail x) y
 
-  --((map (elem (head x)) [y]) ++ rec (tail x) y)
 
+r01 = (["a"] |+| ["b"]) |.| (["a"] |+| ["b"])
+ss01 = ["aa","ab","ba","bb"]
+rec01 = rec r01 ss01 -- retorna True
 
---ex01 = (["a"] |+| ["b"]) |.| (["a"] |+| ["b"])
+r03 = star (["a"] |+| ["b"]) |.| (["b"] |.| ["b"])
+ss03 = ["bb","abb","bbb"]
+rec03 = rec r03 ss03 -- retorna True
 
 {-
 data Regex = Eps | Lit Char | Concat Regex Regex | Union Regex Regex | Star Regex deriving Eq
