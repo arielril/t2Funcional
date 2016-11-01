@@ -1,23 +1,6 @@
 module RegularExp where
 import qualified Data.List as N (nub)
-
-{-
-  Exemplos:
-
--- L={aa,ab,ba,bb}
-  r01 = (a |+| b) |.| (a |+| b)
-  ss01 = ["aa","ab","ba","bb"]
-  rec01 = rec r01 ss01 -- retorna True
-  cex01 = c_exs r01 (ss01 ++ ["aaa","","ab","bba"])
--- retorna ["aaa","","bba"]
-
--- L = Todos os strings sobre {a,b} que terminam em bb
-  r03 = star (a |+| b) |.| (b |.| b)
-  ss03 = ["bb","abb","bbb"]
-  rec03 = rec r03 ss03 -- retorna True
-  cex03 = c_exs r03 (ss03 ++ ["aa","ab","ba","bb","aabb"])
--- retorna ["aa","ab","ba"]
--}
+import Data.Char
 
 (|+|)::[String] -> [String] -> [String]
 -- Executar a operacao de uniao sobre s1 e s2
@@ -34,66 +17,44 @@ _ |.| [] = []
 s1 |.| s2 = N.nub (map (head s1++) s2 ++ tail s1 |.| s2)
 
 star::[String] -> [String]
-star s = take 1000 (star' s)
+star s' = take 50 (star' s')
+  where
+      star' s = s++map (head x++) (tail x) ++ star' (tail x)
+        where x = concat (iterate star' s)
 
-star'::[String]->[String]
-star' s = s++map (head x++) (tail x) ++ star' (tail x)
-    where x = concat (iterate star' s)
-      --concat (iterate star s)
-
-char::String->String
-char s = if length s == 1 then s else []
+eps::[String]
+eps = [""]
 
 rec::[String]->[String]->Bool
 -- rec <lista de possiveis> <lista dada pelo usuario>
-rec x y = or (rec' x y)
+rec x' y' = or (rec' x' y')
+  where
+      rec' x y = map (elem (head x)) [y] ++ rec' (tail x) y
 
-rec'::[String]->[String]->[Bool]
-rec' x y = map (elem (head x)) [y] ++ rec' (tail x) y
+notMatch::[String]->[String]->[String]
+notMatch x' y' = N.nub (notMatch' x' y')
+  where
+  notMatch' [] y = y
+  notMatch' x [] = x
+  notMatch' x y = if elem (head y) x then notMatch' x (tail y) else [head y] ++ notMatch' x (tail y)
 
+-- Todos strings sobre {a, b} com no maximo dois a’s.
+t1 = star ["b"] |.| (["a"] |+| eps) |.| (["a"] |+| eps) |.| star ["b"]
 
-r01 = (["a"] |+| ["b"]) |.| (["a"] |+| ["b"])
-ss01 = ["aa","ab","ba","bb"]
-rec01 = rec r01 ss01 -- retorna True
+-- Todos strings sobre {a, b} com exatamente dois a’s.
+t2 = star ["b"] |.| ["a"] |.| star ["b"] |.| ["a"] |.| star ["b"]
 
-r03 = star (["a"] |+| ["b"]) |.| (["b"] |.| ["b"])
-ss03 = ["bb","abb","bbb"]
-rec03 = rec r03 ss03 -- retorna True
+-- Todos strings sobre {a, b} com nenhum caracter adjacente repetido, isto é,
+--  sem nenhum substring da forma aa ou bb.
+t3 = star (["b"] |.| ["a"]) |+| star (["a"] |.| ["b"]) |+| (["a"] |+| ["b"] |+| eps)
 
-{-
-data Regex = Eps | Lit Char | Concat Regex Regex | Union Regex Regex | Star Regex deriving Eq
+-- Todos constantes numericas fracionarias sobre {0, . . . , 9} ∪ {.}.
+t4 = star [[Data.Char.intToDigit n | n <-[0..9]]] |.| (["."] |+| eps) |.|
+  star [[Data.Char.intToDigit n | n <-[0..9]]]
 
-instance Show Regex where
-  show = printReg
+-- Todos identificadores para tipos em Haskell.
+t5 = [['A'..'Z']] |.| star ([['A'..'Z']] |+| [['a'..'z']] |+|
+  [['0'..'9']] |+| eps)
 
-star:: Regex -> [String]
-star Eps = []
-star (Lit a) = star (Lit a)
-star (Concat x y) = star x++star y
-star (Union x y) = star x++star y
-star (Star x) = star x
-
-
-verifica:: Regex -> String -> Bool
-verifica Eps s = s == ""
-verifica (Lit c) s = [c] == s
---verifica (Concat x y) s =  or [verifica x s1 && verifica y s2 | (s1,s2) <- Split s]
-
-
-
--- Lista de Literais
-lit::Regex -> String
-lit Eps = []
-lit (Lit c) = [c]
-lit (Concat r1 r2) = lit r1 ++ lit r2
-lit (Union r1 r2) = lit r1 ++ lit r2
-lit (Star r) = lit r
-
-
-printReg:: Regex -> String
-printReg Eps = "#"
-printReg (Lit c) = [c]
-printReg (Union r1 r2) = "("++printReg r1++" |+| "++printReg r2++")"
-printReg (Concat r1 r2) = "(" ++ printReg r1++ " |.| " ++ printReg r2 ++ ")"
-printReg (Star r) = "(" ++ printReg r ++ ")*"
--}
+-- Identificadores validos em Java.
+t6 = ([['A'..'Z']] |+| ["_"]) |.| ([['A'..'Z']] |+| ["_"] |+| [['a'..'z']])
