@@ -1,5 +1,5 @@
 module RegularExp where
-
+import qualified Data.List as N (nub)
 
 {-
   Exemplos:
@@ -19,7 +19,41 @@ module RegularExp where
 -- retorna ["aa","ab","ba"]
 -}
 
+{-
 
+  Criar as funcoes com os operandos requisitados e utilizar como entrada as
+  Strings.
+
+  Iterar recursivamente sobre elas para obter os resultados esperados.
+  Aplicar a isnt acima para cada caracter da String.
+
+-}
+
+
+(|+|)::[String] -> [String] -> [String]
+-- Executar a operacao de uniao sobre s1 e s2
+[] |+| _ = []
+_ |+| [] = []
+s1 |+| s2 = N.nub (s1++s2++((map (head s1++) s2) ++ (tail s1 |+| s2)) ++
+  ((map (head s2++) s1) ++ (tail s2 |+| s1)))
+
+
+(|.|)::[String]->[String]->[String]
+-- Executar a operacao de concatenacao sobre s1 e s2
+[] |.| _ = []
+_ |.| [] = []
+s1 |.| s2 = N.nub (map (head s1++) s2 ++ tail s1 |.| s2)
+
+star::[String]->[String]
+star s = s
+
+char::String->String
+char s = if length s == 1 then s else []
+
+
+ex01 = (["a"] |+| ["b"]) |.| (["a"] |+| ["b"])
+
+{-
 data Regex = Eps | Lit Char | Concat Regex Regex | Union Regex Regex | Star Regex deriving Eq
 
 instance Show Regex where
@@ -36,9 +70,7 @@ star (Star x) = star x
 verifica:: Regex -> String -> Bool
 verifica Eps s = s == ""
 verifica (Lit c) s = [c] == s
-verifica (Concat x y) s =  or [verifica x s1 && verifica y s2 | (s1,s2) <- Split s]
-
-
+--verifica (Concat x y) s =  or [verifica x s1 && verifica y s2 | (s1,s2) <- Split s]
 
 
 
@@ -50,9 +82,11 @@ lit (Concat r1 r2) = lit r1 ++ lit r2
 lit (Union r1 r2) = lit r1 ++ lit r2
 lit (Star r) = lit r
 
+
 printReg:: Regex -> String
 printReg Eps = "#"
 printReg (Lit c) = [c]
 printReg (Union r1 r2) = "("++printReg r1++" |+| "++printReg r2++")"
 printReg (Concat r1 r2) = "(" ++ printReg r1++ " |.| " ++ printReg r2 ++ ")"
 printReg (Star r) = "(" ++ printReg r ++ ")*"
+-}
