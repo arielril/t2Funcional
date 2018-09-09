@@ -1,4 +1,4 @@
-# t2Funcional
+# Descrição do trabalho
 
 Objetivo: **Implementar o conceito de expressoes regulares em Haskell.**
 
